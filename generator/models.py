@@ -5,3 +5,4 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=15, unique=True)
     is_paid = models.BooleanField(default=False)
+    telegram_chat_id = models.CharField(max_length=15, null=True, blank=True)  # Додайте це поле для зберігання chat_id

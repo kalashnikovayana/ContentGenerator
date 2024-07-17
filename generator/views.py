@@ -2,13 +2,16 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from .forms import PhoneNumberForm
-from .models import UserProfile
 import openai
 import random
 import string
+from .forms import PhoneNumberForm
+from .models import UserProfile
+from telegram import Bot
 
 openai.api_key = 'your-openai-api-key'
+TELEGRAM_BOT_TOKEN = '7431080630:AAF2hwY4kHx5vM2CICErQ0cdJe_Aaq8cmtg'
+bot = Bot(token=TELEGRAM_BOT_TOKEN)
 
 def generate_random_credentials():
     username = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
@@ -54,12 +57,8 @@ def telegram_login(request):
     if request.method == 'POST':
         phone_number = request.POST.get('phone_number')
         code = ''.join(random.choices(string.digits, k=6))
+        bot.send_message(chat_id=phone_number, text=f"Ваш код для входу: {code}")
         request.session['verification_code'] = code
-        user_profile = UserProfile.objects.get(user=request.user)
-        user_profile.phone_number = phone_number
-        user_profile.is_paid = True
-        user_profile.save()
-        # Логіка для відправки коду через Telegram
         return redirect('enter_code')
     return render(request, 'generator/telegram_login.html')
 
@@ -85,3 +84,17 @@ def enter_code(request):
         else:
             return render(request, 'generator/enter_code.html', {'error': 'Invalid code'})
     return render(request, 'generator/enter_code.html')
+
+@csrf_exempt
+def save_phone_number(request):
+    if request.method == 'POST':
+        form = PhoneNumberForm(request.POST)
+        if form.is_valid():
+            phone_number = form.cleaned_data['phone_number']
+            user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+            user_profile.phone_number = phone_number
+            user_profile.save()
+            return redirect('index')
+    else:
+        form = PhoneNumberForm()
+    return render(request, 'generator/save_phone_number.html', {'form': form})
