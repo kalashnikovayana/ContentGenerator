@@ -1,29 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Content Generator</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: url('/path/to/your/background-image.jpeg') no-repeat center center fixed;
-            background-size: cover;
-            font-family: Arial, sans-serif;
-            color: white;
-        }
-
-        .container {
-            text-align: center;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 20px;
-            border-radius: 10px;
-        }
+</head>
+<body>
+    <h1>Content Generator</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="prompt">Введіть ваш запит:</label>
+        <input type="text" id="prompt" name="prompt" required>
+        <button type="submit">Згенерувати</button>
+    </form>
+    {% if content %}
+        <h2>Результат:</h2>
+        <p>{{ content }}</p>
+    {% endif %}
+</body>
+</html>
 
         h1 {
             font-size: 2em;

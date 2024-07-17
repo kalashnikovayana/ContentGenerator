@@ -1,51 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram Login</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            text-align: center;
-        }
-        input[type="text"], input[type="hidden"] {
-            padding: 10px;
-            width: 80%;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            background-color: #4CAF50;
-            color: white;
-            font-size: 1em;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Login with Telegram</h1>
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="chat_id" id="chat_id">
-            <input type="text" name="username" placeholder="Enter your Telegram username" required>
-            <button type="submit">Login</button>
-        </form>
-    </div>
+    <h1>Вхід через Telegram</h1>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="chat_id" id="chat_id">
+        <label for="username">Telegram Ім'я користувача:</label>
+        <input type="text" id="username" name="username" required>
+        <button type="submit">Увійти</button>
+    </form>
 
     <script>
         window.addEventListener('DOMContentLoaded', (event) => {
