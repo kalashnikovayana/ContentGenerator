@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Telegram Login</title>
+</head>
+<body>
+    <h1>Login through Telegram</h1>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Login with Telegram</button>
+    </form>
+</body>
+</html>

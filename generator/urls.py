@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import telegram_login, index
+from generator.views import index, telegram_login, login_view
 
 urlpatterns = [
-    path('login/', telegram_login, name='telegram_login'),
-    path('', index, name='index'),
+    path('', login_view, name='login'),
+    path('index/', index, name='index'),
+    path('telegram_login/', telegram_login, name='telegram_login'),
 ]
 

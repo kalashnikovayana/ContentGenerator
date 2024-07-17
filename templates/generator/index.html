@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,61 +9,18 @@
     <h1>Content Generator</h1>
     <form method="post">
         {% csrf_token %}
-        <label for="prompt">Введіть ваш запит:</label>
-        <input type="text" id="prompt" name="prompt" required>
+        <label for="niche">Введіть вашу нішу:</label>
+        <input type="text" id="niche" name="niche"><br><br>
+        <label for="content_type">Виберіть тип контенту:</label>
+        <select id="content_type" name="content_type">
+            <option value="content_plan">Контент-план</option>
+            <option value="post">Пост</option>
+        </select><br><br>
         <button type="submit">Згенерувати</button>
     </form>
-    {% if content %}
-        <h2>Результат:</h2>
-        <p>{{ content }}</p>
+    {% if generated_text %}
+        <h2>Generated Content:</h2>
+        <p>{{ generated_text }}</p>
     {% endif %}
-</body>
-</html>
-
-        h1 {
-            font-size: 2em;
-            margin-bottom: 20px;
-        }
-
-        input[type="text"] {
-            padding: 10px;
-            width: 60%;
-            border: none;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            background-color: #4CAF50;
-            color: white;
-            font-size: 1em;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        p {
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Creating</h1>
-        <form method="post">
-            {% csrf_token %}
-            <input type="text" name="prompt" placeholder="Enter your prompt here">
-            <button type="submit">Generate</button>
-        </form>
-        {% if content %}
-            <h2>Generated Content:</h2>
-            <p>{{ content }}</p>
-        {% endif %}
-    </div>
 </body>
 </html>
