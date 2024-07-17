@@ -84,5 +84,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # OpenAI API key
 OPENAI_API_KEY = 'your-openai-api-key'
+TELEGRAM_BOT_TOKEN = 'your-telegram-bot-token'
 
+# Authentication settings
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
 

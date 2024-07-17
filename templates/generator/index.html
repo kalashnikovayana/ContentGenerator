@@ -1,26 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Content Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 2rem;
+            color: #333;
+        }
+        input, select {
+            width: 80%;
+            padding: 1rem;
+            margin: 1rem 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
 </head>
 <body>
-    <h1>Content Generator</h1>
-    <form method="post">
-        {% csrf_token %}
-        <label for="niche">Введіть вашу нішу:</label>
-        <input type="text" id="niche" name="niche"><br><br>
-        <label for="content_type">Виберіть тип контенту:</label>
-        <select id="content_type" name="content_type">
-            <option value="content_plan">Контент-план</option>
-            <option value="post">Пост</option>
-        </select><br><br>
-        <button type="submit">Згенерувати</button>
-    </form>
-    {% if generated_text %}
-        <h2>Generated Content:</h2>
-        <p>{{ generated_text }}</p>
-    {% endif %}
+    <div class="container">
+        <h1>Content Generator</h1>
+        <input type="text" placeholder="Введіть вашу нішу" />
+        <select>
+            <option>Виберіть тип контенту</option>
+            <option>Контент-план</option>
+            <option>Пости</option>
+        </select>
+        <button>Згенерувати</button>
+    </div>
 </body>
 </html>
+

@@ -4,6 +4,8 @@ from django.views.decorators.csrf import csrf_exempt
 import openai
 import random
 import string
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
 
 openai.api_key = 'your-openai-api-key'
 
@@ -17,7 +19,7 @@ def index(request):
     if request.method == 'POST':
         prompt = request.POST.get('prompt')
         response = openai.Completion.create(
-            engine="davinci-codex",
+            engine="text-davinci-003",
             prompt=prompt,
             max_tokens=150
         )
@@ -30,15 +32,21 @@ def telegram_login(request):
     if request.method == 'POST':
         # Simulate user authentication after payment
         username, password = generate_random_credentials()
+        # Save user to the database
+        user = User.objects.create_user(username=username, password=password)
         # Send username and password to the user via Telegram bot (not implemented here)
         return HttpResponse(f'Login: {username}, Password: {password}')
     return render(request, 'generator/telegram_login.html')
 
-def login_view(request):
+@csrf_exempt
+def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        # Authenticate user (logic not implemented here)
-        # Redirect to the main page after successful login
-        return redirect('index')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('index')
+        else:
+            return HttpResponse('Invalid login credentials')
     return render(request, 'generator/login.html')
