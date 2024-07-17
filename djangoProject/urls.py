@@ -1,12 +1,13 @@
 # djangoProject/urls.py
 
 from django.urls import path
-from generator.views import index, telegram_login, custom_login, enter_code
+from generator import views
 
 urlpatterns = [
-    path('', index, name='index'),
-    path('telegram_login/', telegram_login, name='telegram_login'),
-    path('login/', custom_login, name='login'),
-    path('enter_code/', enter_code, name='enter_code'),
+    path('', views.index, name='index'),
+    path('email_login/', views.email_login, name='email_login'),
+    path('enter_otp/', views.enter_otp, name='enter_otp'),
+    path('login/', views.custom_login, name='login'),
+    path('enter_code/', views.enter_code, name='enter_code'),
 ]
 

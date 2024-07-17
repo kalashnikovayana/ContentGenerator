@@ -1,11 +1,10 @@
 from django.urls import path
-from .views import index, telegram_login, custom_login, enter_code, save_phone_number
+from .views import index, email_login, enter_otp
 
 urlpatterns = [
     path('', index, name='index'),
-    path('telegram_login/', telegram_login, name='telegram_login'),
-    path('login/', custom_login, name='login'),
-    path('enter_code/', enter_code, name='enter_code'),
-    path('save_phone_number/', save_phone_number, name='save_phone_number'),
+    path('email_login/', email_login, name='email_login'),
+    path('enter_otp/', enter_otp, name='enter_otp'),
 ]
+
 

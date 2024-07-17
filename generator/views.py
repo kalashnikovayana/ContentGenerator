@@ -1,22 +1,14 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
-from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import openai
 import random
 import string
-from .forms import PhoneNumberForm
-from .models import UserProfile
-from telegram import Bot
+from .forms import EmailLoginForm, OTPForm
+from django.core.mail import send_mail
+from django_otp.plugins.otp_email.models import EmailDevice
 
 openai.api_key = 'your-openai-api-key'
-TELEGRAM_BOT_TOKEN = '7431080630:AAF2hwY4kHx5vM2CICErQ0cdJe_Aaq8cmtg'
-bot = Bot(token=TELEGRAM_BOT_TOKEN)
-
-def generate_random_credentials():
-    username = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
-    password = ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
-    return username, password
 
 @csrf_exempt
 def index(request):
@@ -53,48 +45,42 @@ def index(request):
     return render(request, 'generator/index.html')
 
 @csrf_exempt
-def telegram_login(request):
+def email_login(request):
     if request.method == 'POST':
-        phone_number = request.POST.get('phone_number')
-        code = ''.join(random.choices(string.digits, k=6))
-        bot.send_message(chat_id=phone_number, text=f"Ваш код для входу: {code}")
-        request.session['verification_code'] = code
-        return redirect('enter_code')
-    return render(request, 'generator/telegram_login.html')
-
-@csrf_exempt
-def custom_login(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('index')
-        else:
-            return render(request, 'generator/login.html', {'error': 'Invalid credentials'})
-    return render(request, 'generator/login.html')
-
-@csrf_exempt
-def enter_code(request):
-    if request.method == 'POST':
-        code = request.POST.get('code')
-        if code == request.session.get('verification_code'):
-            return redirect('index')
-        else:
-            return render(request, 'generator/enter_code.html', {'error': 'Invalid code'})
-    return render(request, 'generator/enter_code.html')
-
-@csrf_exempt
-def save_phone_number(request):
-    if request.method == 'POST':
-        form = PhoneNumberForm(request.POST)
+        form = EmailLoginForm(request.POST)
         if form.is_valid():
-            phone_number = form.cleaned_data['phone_number']
-            user_profile, created = UserProfile.objects.get_or_create(user=request.user)
-            user_profile.phone_number = phone_number
-            user_profile.save()
-            return redirect('index')
+            email = form.cleaned_data['email']
+            device, created = EmailDevice.objects.get_or_create(user=request.user, email=email)
+            otp = ''.join(random.choices(string.digits, k=6))
+            device.token = otp
+            device.save()
+            send_mail(
+                'Your OTP Code',
+                f'Your OTP code is {otp}',
+                'from@example.com',
+                [email],
+                fail_silently=False,
+            )
+            request.session['email'] = email
+            return redirect('enter_otp')
     else:
-        form = PhoneNumberForm()
-    return render(request, 'generator/save_phone_number.html', {'form': form})
+        form = EmailLoginForm()
+    return render(request, 'generator/email_login.html', {'form': form})
+
+@csrf_exempt
+def enter_otp(request):
+    if request.method == 'POST':
+        form = OTPForm(request.POST)
+        if form.is_valid():
+            otp = form.cleaned_data['otp']
+            email = request.session.get('email')
+            device = EmailDevice.objects.get(email=email)
+            if device.verify_token(otp):
+                login(request, device.user)
+                return redirect('index')
+            else:
+                return render(request, 'generator/enter_otp.html', {'form': form, 'error': 'Invalid OTP'})
+    else:
+        form = OTPForm()
+    return render(request, 'generator/enter_otp.html', {'form': form})
+
