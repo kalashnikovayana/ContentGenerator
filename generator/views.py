@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from .forms import PhoneNumberForm
+from .models import UserProfile
 import openai
 import random
 import string
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User
 
 openai.api_key = 'your-openai-api-key'
 
@@ -17,29 +18,53 @@ def generate_random_credentials():
 @csrf_exempt
 def index(request):
     if request.method == 'POST':
-        prompt = request.POST.get('prompt')
+        niche = request.POST.get('niche')
+        audience = request.POST.get('audience')
+        content_type = request.POST.get('content_type')
+
+        if content_type == 'content_plan':
+            prompt = (
+                f"Аналізуй нішу {niche} та цільову аудиторію {audience}. "
+                f"Визнач сегменти ринку, характеристики цільової аудиторії, їх болі та вигоди. "
+                f"На основі цього аналізу сформуй контент-план на 7 днів, "
+                f"включаючи дату, тему посту, рекламне повідомлення, опис контенту та пропозиції графічного зображення."
+            )
+            max_tokens = 300
+        elif content_type == 'post':
+            prompt = (
+                f"Створи пост для ніші {niche} та цільової аудиторії {audience}. "
+                f"Включи аналіз цільової аудиторії, визнач сегменти, характеристики, болі та вигоди. "
+                f"На основі цього сформуй зміст посту."
+            )
+            max_tokens = 50
+
         response = openai.Completion.create(
             engine="text-davinci-003",
             prompt=prompt,
-            max_tokens=150
+            max_tokens=max_tokens,
+            temperature=0.5,
+            n=1
         )
-        content = response.choices[0].text.strip()
-        return render(request, 'generator/index.html', {'content': content})
+        generated_text = response.choices[0].text.strip()
+        return render(request, 'generator/index.html', {'generated_text': generated_text})
     return render(request, 'generator/index.html')
 
 @csrf_exempt
 def telegram_login(request):
     if request.method == 'POST':
-        # Simulate user authentication after payment
-        username, password = generate_random_credentials()
-        # Save user to the database
-        user = User.objects.create_user(username=username, password=password)
-        # Send username and password to the user via Telegram bot (not implemented here)
-        return HttpResponse(f'Login: {username}, Password: {password}')
+        phone_number = request.POST.get('phone_number')
+        code = ''.join(random.choices(string.digits, k=6))
+        request.session['verification_code'] = code
+        user_profile = UserProfile.objects.get(user=request.user)
+        user_profile.phone_number = phone_number
+        user_profile.is_paid = True
+        user_profile.save()
+        # Логіка для відправки коду через Telegram
+        return redirect('enter_code')
     return render(request, 'generator/telegram_login.html')
 
 @csrf_exempt
-def user_login(request):
+def custom_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -48,5 +73,15 @@ def user_login(request):
             login(request, user)
             return redirect('index')
         else:
-            return HttpResponse('Invalid login credentials')
+            return render(request, 'generator/login.html', {'error': 'Invalid credentials'})
     return render(request, 'generator/login.html')
+
+@csrf_exempt
+def enter_code(request):
+    if request.method == 'POST':
+        code = request.POST.get('code')
+        if code == request.session.get('verification_code'):
+            return redirect('index')
+        else:
+            return render(request, 'generator/enter_code.html', {'error': 'Invalid code'})
+    return render(request, 'generator/enter_code.html')
